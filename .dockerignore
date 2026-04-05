@@ -1,0 +1,26 @@
+# Git
+.git
+.gitattributes
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.iml
+
+# Build output
+build
+app/build
+frontend/node_modules
+frontend/dist
+
+# Runtime data
+data
+
+# Docker
+docker-compose.yml
+Dockerfile
+frontend/Dockerfile
+
+# Docs
+README.md
