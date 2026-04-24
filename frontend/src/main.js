@@ -6,7 +6,6 @@ import App from './App.vue'
 import messages from './i18n'
 import './assets/styles/main.css'
 
-import { VueDatePicker } from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
 
 const i18n = createI18n({
@@ -19,6 +18,5 @@ const i18n = createI18n({
 const app = createApp(App)
 app.use(createPinia())
 app.use(router)
-app.component('VueDatePicker', VueDatePicker)
 app.use(i18n)
 app.mount('#app')

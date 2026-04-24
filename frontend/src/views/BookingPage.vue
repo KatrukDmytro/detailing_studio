@@ -66,7 +66,7 @@
           <div class="datetime-layout">
             <div class="calendar-column">
               <h3 class="step-title">{{ $t('booking.selectDate') }}</h3>
-              <div class="datepicker-container">
+              <div class="datepicker-container" :class="{ 'is-loading': bookingStore.loading }">
                 <VueDatePicker
                   v-model="datePickerDate"
                   :locale="locale"
@@ -78,7 +78,13 @@
                   auto-apply
                   dark
                   :month-change-on-scroll="false"
+                  :config="{
+                    allowStopPropagation: true,
+                  }"
                 />
+                <div v-if="bookingStore.loading && !bookingStore.availableDates.length" class="datepicker-overlay">
+                  <div class="loader"></div>
+                </div>
               </div>
             </div>
             
@@ -237,6 +243,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useBookingStore } from '../stores/booking'
 import api from '../api/client'
+import { VueDatePicker } from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
 
 const bookingStore = useBookingStore()
 const currentStep = ref(0)
@@ -559,6 +567,21 @@ onMounted(() => {
   padding: 16px;
   box-shadow: var(--shadow-lg);
   width: 100%;
+  position: relative;
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+}
+
+.datepicker-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 5, 16, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: var(--radius-lg);
 }
 
 .selected-date-preview {
@@ -569,15 +592,25 @@ onMounted(() => {
 
 /* Deep overrides for DatePicker size and style */
 :deep(.dp__main) {
-  width: 100%;
+  width: 100% !important;
   font-family: var(--font-primary);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+:deep(.dp__outer_menu_wrap) {
+  width: 100% !important;
+  position: relative !important;
 }
 
 :deep(.dp__menu) {
+  position: relative !important;
   border: none !important;
   background: transparent !important;
   width: 100% !important;
   box-shadow: none !important;
+  padding: 0 !important;
 }
 
 :deep(.dp__calendar_wrap) {
@@ -588,21 +621,25 @@ onMounted(() => {
   width: 100% !important;
 }
 
+:deep(.dp__menu_inner) {
+  padding: 0 !important;
+}
+
 /* Larger cells for better touch/click experience */
 :deep(.dp__cell_inner) {
-  height: 50px !important;
+  height: clamp(36px, 5vw, 54px) !important;
   width: 100% !important;
-  font-size: 1.1rem !important;
+  font-size: clamp(0.8rem, 1.2vw, 1.1rem) !important;
   border-radius: var(--radius-md) !important;
   margin: 2px 0;
 }
 
 :deep(.dp__calendar_header_item) {
-  font-size: 0.9rem !important;
+  font-size: 0.8rem !important;
   font-weight: 700 !important;
   text-transform: uppercase;
   color: var(--text-secondary);
-  padding: 12px 0 !important;
+  padding: 8px 0 !important;
 }
 
 :deep(.dp__month_year_row) {
