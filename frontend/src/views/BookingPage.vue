@@ -67,8 +67,16 @@
           <div class="datetime-grid">
             <div>
               <h3 class="step-title">{{ $t('booking.selectDate') }}</h3>
-              <input type="date" v-model="bookingStore.selectedDate" class="form-input date-input"
-                     :min="minDate" @change="onDateChange" />
+              <VueDatePicker
+                v-model="datePickerDate"
+                :locale="locale"
+                :enable-time-picker="false"
+                :min-date="new Date()"
+                :allowed-dates="allowedDatesArray"
+                @update-month-year="handleMonthYearChange"
+                inline
+                auto-apply
+              />
             </div>
             <div>
               <h3 class="step-title">{{ $t('booking.selectTime') }}</h3>
@@ -232,6 +240,10 @@ const stepLabels = computed(() => {
 
 import { useI18n } from 'vue-i18n'
 
+const { t, locale } = useI18n()
+
+const datePickerDate = ref(null)
+
 const minDate = computed(() => {
   const d = new Date()
   return d.toISOString().split('T')[0]
@@ -249,6 +261,41 @@ const canProceed = computed(() => {
 
 function nextStep() {
   if (canProceed.value) currentStep.value++
+}
+
+import { watch } from 'vue'
+
+watch(currentStep, async (newVal) => {
+  if (newVal === 1) {
+    const today = new Date()
+    await bookingStore.fetchAvailableDates(today.getFullYear(), today.getMonth() + 1)
+  }
+})
+
+watch(datePickerDate, async (newDate) => {
+  if (newDate) {
+    // Format to YYYY-MM-DD
+    const d = new Date(newDate)
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    bookingStore.selectedDate = `${year}-${month}-${day}`
+    await onDateChange()
+  } else {
+    bookingStore.selectedDate = ''
+  }
+})
+
+const allowedDatesArray = computed(() => {
+  return bookingStore.availableDates.map(dateStr => {
+    const parts = dateStr.split('-');
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+  });
+});
+
+async function handleMonthYearChange({ instance, month, year }) {
+  // VueDatePicker month is 0-indexed
+  await bookingStore.fetchAvailableDates(year, month + 1)
 }
 
 async function onDateChange() {
@@ -470,6 +517,32 @@ onMounted(() => {
 .date-input {
   color-scheme: dark;
   font-size: 1rem;
+}
+
+:deep(.dp__theme_light) {
+  --dp-background-color: var(--bg-card);
+  --dp-text-color: var(--text-primary);
+  --dp-hover-color: var(--bg-card-hover);
+  --dp-hover-text-color: var(--accent-gold);
+  --dp-hover-icon-color: var(--accent-gold);
+  --dp-primary-color: var(--accent-gold);
+  --dp-primary-disabled-color: rgba(212, 168, 67, 0.5);
+  --dp-primary-text-color: #0a0a0f;
+  --dp-secondary-color: var(--text-secondary);
+  --dp-border-color: var(--border);
+  --dp-menu-border-color: var(--border);
+  --dp-border-color-hover: var(--border-gold);
+  --dp-disabled-color: rgba(255, 255, 255, 0.05);
+  --dp-scroll-bar-background: var(--bg-card);
+  --dp-scroll-bar-color: var(--border);
+  --dp-success-color: var(--accent-green);
+  --dp-success-color-disabled: rgba(46, 204, 113, 0.5);
+  --dp-icon-color: var(--text-secondary);
+  --dp-danger-color: var(--accent-red);
+  --dp-marker-color: var(--accent-red);
+  --dp-tooltip-color: var(--bg-card);
+  --dp-disabled-color-text: var(--text-muted);
+  --dp-highlight-color: rgba(212, 168, 67, 0.1);
 }
 
 .time-slots-grid {

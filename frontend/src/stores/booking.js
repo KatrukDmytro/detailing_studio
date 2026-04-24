@@ -6,6 +6,7 @@ export const useBookingStore = defineStore('booking', () => {
   const services = ref([])
   const selectedServices = ref([])
   const availableSlots = ref([])
+  const availableDates = ref([])
   const selectedDate = ref('')
   const selectedSlot = ref(null)
   const loading = ref(false)
@@ -39,6 +40,21 @@ export const useBookingStore = defineStore('booking', () => {
     }
   }
 
+  async function fetchAvailableDates(year, month) {
+    if (selectedServices.value.length === 0) return
+    try {
+      loading.value = true
+      const { data } = await api.get('/schedule/available-dates', {
+        params: { year, month, serviceIds: selectedServices.value.join(',') }
+      })
+      availableDates.value = data
+    } catch (e) {
+      error.value = 'Failed to load available dates'
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function fetchWorkingDays() {
     try {
       const { data } = await api.get('/schedule/working-days')
@@ -58,6 +74,7 @@ export const useBookingStore = defineStore('booking', () => {
     // Reset slot when services change
     selectedSlot.value = null
     availableSlots.value = []
+    availableDates.value = []
   }
 
   function totalDuration() {
@@ -79,15 +96,16 @@ export const useBookingStore = defineStore('booking', () => {
   function reset() {
     selectedServices.value = []
     availableSlots.value = []
+    availableDates.value = []
     selectedDate.value = ''
     selectedSlot.value = null
     error.value = null
   }
 
   return {
-    services, selectedServices, availableSlots, selectedDate, selectedSlot,
+    services, selectedServices, availableSlots, availableDates, selectedDate, selectedSlot,
     loading, error, workingDays,
-    fetchServices, fetchAvailableSlots, fetchWorkingDays,
+    fetchServices, fetchAvailableSlots, fetchAvailableDates, fetchWorkingDays,
     toggleService, totalDuration, totalPrice, selectedServiceDetails, reset
   }
 })

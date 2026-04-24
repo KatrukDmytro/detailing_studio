@@ -62,6 +62,29 @@ public class SlotCalculationService {
         return slots;
     }
 
+    public List<LocalDate> getAvailableDates(int year, int month, int totalDurationMinutes) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+        int daysInMonth = yearMonth.lengthOfMonth();
+        List<LocalDate> availableDates = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+
+        for (int i = 1; i <= daysInMonth; i++) {
+            LocalDate date = yearMonth.atDay(i);
+            if (date.isBefore(today)) {
+                continue; // Skip past dates
+            }
+
+            List<AvailableSlotResponse> slots = getAvailableSlots(date, totalDurationMinutes);
+            boolean hasAvailableSlot = slots.stream().anyMatch(AvailableSlotResponse::isAvailable);
+
+            if (hasAvailableSlot) {
+                availableDates.add(date);
+            }
+        }
+
+        return availableDates;
+    }
+
     private boolean isSlotAvailable(LocalDate date, LocalTime slotStart, LocalTime slotEnd,
                                      List<Booking> existingBookings, BreakConfig breakConfig,
                                      int breakMinutes) {
