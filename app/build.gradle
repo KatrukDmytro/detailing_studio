@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.spring.dependency.management)
 }
 
-group = 'com.passlavski'
+group = 'com.brisa'
 version = '0.0.1-SNAPSHOT'
 
 java {

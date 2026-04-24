@@ -1,5 +1,5 @@
 <template>
-  <div id="passlavski-app">
+  <div id="brisa-app">
     <AppNavbar />
     <main>
       <router-view v-slot="{ Component }">
@@ -12,7 +12,7 @@
       <div class="container">
         <div class="footer-content">
           <div class="footer-brand">
-            <span class="footer-logo">PASSLAVSKI</span>
+            <span class="footer-logo">BRISA</span>
             <p class="footer-tagline">{{ $t('footer.tagline') }}</p>
           </div>
           <p class="footer-copy">{{ $t('footer.rights') }}</p>

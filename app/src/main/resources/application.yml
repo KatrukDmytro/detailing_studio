@@ -27,7 +27,7 @@ spring:
   security:
     user:
       name: admin
-      password: passlavski2026
+      password: brisa2026
 
 server:
   port: 8080
@@ -36,7 +36,7 @@ server:
 app:
   admin:
     username: admin
-    password: passlavski2026
+    password: brisa2026
   cors:
     allowed-origins: http://localhost:5173,http://localhost:3000
 

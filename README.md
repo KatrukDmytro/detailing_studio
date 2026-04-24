@@ -1,6 +1,6 @@
-# 🚗 Passlavski — Premium Mobile Auto Detailing Studio
+# 🚗 BRISA Mobile Detailing — Premium Mobile Auto Detailing Studio
 
-A full-stack web application for **Passlavski**, a mobile auto detailing studio that provides professional car care services at the customer's location. The application serves as both a **promotional website** and a **booking management system**.
+A full-stack web application for **BRISA Mobile Detailing**, a mobile auto detailing studio that provides professional car care services at the customer's location. The application serves as both a **promotional website** and a **booking management system**.
 
 ---
 
@@ -29,7 +29,7 @@ A full-stack web application for **Passlavski**, a mobile auto detailing studio 
 
 ## Overview
 
-Passlavski is a mobile auto detailing studio specializing in:
+BRISA Mobile Detailing is a mobile auto detailing studio specializing in:
 
 - **Exterior Polishing** — Paint correction, swirl mark removal, oxidation treatment
 - **Interior Cleaning** — Deep cleaning of all interior surfaces
@@ -337,7 +337,7 @@ Open a **second terminal** (keep the backend running in the first one).
 | Field | Value |
 |-------|-------|
 | Username | `admin` |
-| Password | `passlavski2026` |
+| Password | `brisa2026` |
 
 > These credentials are configured in `app/src/main/resources/application.yml` and should be changed for production.
 
@@ -453,7 +453,7 @@ Translation files are located in `frontend/src/i18n/`. The selected language is 
 | `spring.servlet.multipart.max-file-size` | `10MB` | Max photo upload size |
 | `spring.servlet.multipart.max-request-size` | `50MB` | Max total request size |
 | `app.admin.username` | `admin` | Admin login username |
-| `app.admin.password` | `passlavski2026` | Admin login password |
+| `app.admin.password` | `brisa2026` | Admin login password |
 
 ### Frontend Configuration (`vite.config.js`)
 
@@ -504,4 +504,4 @@ On first startup, the application seeds the following data:
 
 ## 📝 License
 
-© 2026 Passlavski. All rights reserved.
+© 2026 BRISA Mobile Detailing. All rights reserved.

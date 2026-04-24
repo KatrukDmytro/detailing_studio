@@ -24,6 +24,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/schedule/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/bookings/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/bookings/photos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/reviews/**").permitAll()
                         .requestMatchers("/api/admin/login").permitAll()
                         // Admin endpoints require authentication
                         .requestMatchers("/api/admin/**").authenticated()

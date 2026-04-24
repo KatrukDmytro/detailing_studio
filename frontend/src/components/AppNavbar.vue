@@ -2,12 +2,15 @@
   <nav class="navbar" :class="{ scrolled: isScrolled }">
     <div class="container navbar-inner">
       <router-link to="/" class="navbar-brand">
-        <span class="brand-text">PASSLAVSKI</span>
+        <span class="brand-text">BRISA</span>
+        <span class="brand-sub">MOBILE DETAILING</span>
       </router-link>
 
       <div class="navbar-links" :class="{ open: menuOpen }">
         <router-link to="/" class="nav-link" @click="menuOpen = false">{{ $t('nav.home') }}</router-link>
         <router-link to="/#services" class="nav-link" @click="menuOpen = false">{{ $t('nav.services') }}</router-link>
+        <router-link to="/reviews" class="nav-link" @click="menuOpen = false">{{ $t('nav.reviews') || 'Reviews' }}</router-link>
+        <a href="#contact" class="nav-link" @click="menuOpen = false">{{ $t('nav.contact') }}</a>
         <router-link to="/booking" class="nav-link" @click="menuOpen = false">
           <span class="nav-booking-btn">{{ $t('nav.booking') }}</span>
         </router-link>
@@ -77,10 +80,11 @@ onUnmounted(() => {
 }
 
 .navbar.scrolled {
-  background: rgba(10, 10, 15, 0.9);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
+  background: rgba(2, 5, 16, 0.92);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(0, 180, 255, 0.12);
   padding: 12px 0;
+  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.6);
 }
 
 .navbar-inner {
@@ -91,19 +95,31 @@ onUnmounted(() => {
 
 .navbar-brand {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: baseline;
+  gap: 8px;
 }
 
 .brand-text {
   font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 1.4rem;
-  letter-spacing: 0.2em;
-  background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light));
+  font-weight: 900;
+  font-size: 1.6rem;
+  letter-spacing: 0.22em;
+  background: linear-gradient(135deg, #fff 20%, var(--accent-blue-light) 60%, var(--accent-blue) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 0 12px rgba(0, 180, 255, 0.5));
+}
+
+.brand-sub {
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  opacity: 0.85;
 }
 
 .navbar-links {
@@ -113,11 +129,12 @@ onUnmounted(() => {
 }
 
 .nav-link {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-secondary);
   transition: var(--transition);
   position: relative;
+  letter-spacing: 0.03em;
 }
 
 .nav-link:hover {
@@ -131,8 +148,10 @@ onUnmounted(() => {
   left: 0;
   width: 0;
   height: 2px;
-  background: var(--accent-gold);
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-blue-light));
+  box-shadow: 0 0 8px var(--accent-blue-glow);
   transition: width 0.3s ease;
+  border-radius: 2px;
 }
 
 .nav-link:hover::after {
@@ -140,16 +159,19 @@ onUnmounted(() => {
 }
 
 .nav-booking-btn {
-  background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark));
-  color: #0a0a0f;
+  background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-blue-dark) 100%);
+  color: #fff;
   padding: 8px 20px;
   border-radius: var(--radius-sm);
   font-weight: 600;
   transition: var(--transition);
+  border: 1px solid rgba(0, 180, 255, 0.3);
+  box-shadow: 0 0 16px rgba(0, 180, 255, 0.15);
 }
 
 .nav-booking-btn:hover {
-  box-shadow: var(--shadow-gold);
+  box-shadow: 0 0 28px rgba(0, 180, 255, 0.35);
+  transform: translateY(-1px);
 }
 
 .nav-link:has(.nav-booking-btn)::after {
@@ -162,7 +184,7 @@ onUnmounted(() => {
 
 .lang-select {
   background: var(--bg-card);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-blue);
   color: var(--text-secondary);
   padding: 6px 12px;
   border-radius: var(--radius-sm);
@@ -174,8 +196,9 @@ onUnmounted(() => {
 }
 
 .lang-select:hover, .lang-select:focus {
-  border-color: var(--accent-gold);
+  border-color: var(--accent-blue);
   color: var(--text-primary);
+  box-shadow: 0 0 10px rgba(0, 180, 255, 0.15);
 }
 
 .lang-select option {
@@ -193,7 +216,7 @@ onUnmounted(() => {
 .toggle-bar {
   width: 24px;
   height: 2px;
-  background: var(--text-primary);
+  background: var(--accent-blue);
   border-radius: 2px;
   transition: var(--transition);
 }
@@ -208,18 +231,22 @@ onUnmounted(() => {
     top: 60px;
     left: 0;
     right: 0;
-    background: rgba(10, 10, 15, 0.95);
-    backdrop-filter: blur(20px);
+    background: rgba(2, 5, 16, 0.97);
+    backdrop-filter: blur(24px);
     flex-direction: column;
     padding: 24px;
     gap: 20px;
     transform: translateY(-120%);
     transition: transform 0.3s ease;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-blue);
   }
 
   .navbar-links.open {
     transform: translateY(0);
+  }
+
+  .brand-sub {
+    display: none;
   }
 }
 </style>

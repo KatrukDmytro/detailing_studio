@@ -2,6 +2,8 @@ export default {
   nav: {
     home: 'Home',
     services: 'Services',
+    reviews: 'Reviews',
+    contact: 'Contact',
     booking: 'Book Now',
     admin: 'Admin',
     language: 'Language'
@@ -20,7 +22,7 @@ export default {
     from: 'from'
   },
   why: {
-    title: 'Why Choose Passlavski?',
+    title: 'Why Choose BRISA Mobile Detailing?',
     mobile: { title: 'Mobile Service', desc: 'We come to your location — home, office, or anywhere convenient.' },
     professional: { title: 'Professional Equipment', desc: 'Industry-leading tools and premium products for flawless results.' },
     experience: { title: 'Expert Team', desc: 'Years of experience with all vehicle types and paint systems.' },
@@ -28,8 +30,19 @@ export default {
   },
   cta: {
     title: 'Ready to Transform Your Vehicle?',
-    subtitle: 'Book your appointment today and experience the Passlavski difference.',
+    subtitle: 'Book your appointment today and experience the BRISA Mobile Detailing difference.',
     button: 'Book Now'
+  },
+  contact: {
+    title: 'Get In Touch',
+    subtitle: 'We are available around the clock — call, text, or find us on Instagram.',
+    callOrText: 'Call or Text 24/7',
+    available: 'Available around the clock',
+    instagram: 'Follow on Instagram',
+    instagramHint: 'See our latest work',
+    area: 'Service Area',
+    areaValue: 'Jacksonville & St. Augustine',
+    areaHint: 'We come to your location'
   },
   booking: {
     title: 'Book Your Session',
@@ -80,7 +93,7 @@ export default {
     },
     success: {
       title: 'Booking Confirmed!',
-      message: 'Thank you for choosing Passlavski. We will contact you shortly to confirm your appointment.',
+      message: 'Thank you for choosing BRISA Mobile Detailing. We will contact you shortly to confirm your appointment.',
       backHome: 'Back to Home',
       bookAnother: 'Book Another Session'
     },
@@ -152,8 +165,27 @@ export default {
     SATURDAY: 'Saturday',
     SUNDAY: 'Sunday'
   },
+  reviews: {
+    title: 'Customer Reviews',
+    subtitle: 'See what our clients say about us and leave your own feedback',
+    leaveReview: 'Leave a Review',
+    name: 'Your Name',
+    namePlaceholder: 'John Doe',
+    contactInfo: 'Contact Info (Phone/Email)',
+    contactPlaceholder: 'Optional',
+    rating: 'Rating',
+    loved: 'What did you love?',
+    lovedPlaceholder: 'Tell us what we did great...',
+    improve: 'What can we improve?',
+    improvePlaceholder: 'Any suggestions...',
+    photos: 'Upload Photos',
+    submit: 'Submit Review',
+    submitting: 'Submitting...',
+    success: 'Thank you for your review!',
+    noReviews: 'No reviews yet. Be the first to leave one!'
+  },
   footer: {
-    rights: '© 2026 Passlavski. All rights reserved.',
+    rights: '© 2026 BRISA Mobile Detailing. All rights reserved.',
     tagline: 'Premium Mobile Auto Detailing'
   }
 }

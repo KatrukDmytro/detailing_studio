@@ -26,7 +26,7 @@
       <!-- Admin Dashboard -->
       <div v-else class="admin-dashboard">
         <div class="admin-header">
-          <h1 class="section-title" style="text-align:left">Passlavski Admin</h1>
+          <h1 class="section-title" style="text-align:left">BRISA Mobile Detailing Admin</h1>
           <button class="btn btn-secondary btn-small" @click="adminStore.logout()">{{ $t('admin.logout') }}</button>
         </div>
 
