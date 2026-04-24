@@ -22,7 +22,6 @@ public class BookingPhoto {
     @Column(nullable = false)
     private String contentType;
 
-    @Lob
     @Column(nullable = false, columnDefinition = "BYTEA")
     private byte[] data;
 

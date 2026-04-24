@@ -17,6 +17,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByStatusOrderByStartTimeAsc(BookingStatus status);
 
-    @Query("SELECT b FROM Booking b ORDER BY b.createdAt DESC")
-    List<Booking> findAllOrderByCreatedAtDesc();
+    List<Booking> findAllByOrderByCreatedAtDesc();
 }

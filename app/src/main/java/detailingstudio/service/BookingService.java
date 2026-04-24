@@ -80,12 +80,14 @@ public class BookingService {
         return mapToResponse(booking);
     }
 
+    @Transactional(readOnly = true)
     public List<BookingResponse> getAllBookings() {
-        return bookingRepository.findAllOrderByCreatedAtDesc().stream()
+        return bookingRepository.findAllByOrderByCreatedAtDesc().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public BookingResponse getBookingById(Long id) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found: " + id));
@@ -111,6 +113,7 @@ public class BookingService {
         return photo.getData();
     }
 
+    @Transactional(readOnly = true)
     public BookingPhoto getPhoto(Long photoId) {
         return bookingPhotoRepository.findById(photoId)
                 .orElseThrow(() -> new IllegalArgumentException("Photo not found: " + photoId));
