@@ -62,26 +62,42 @@
           </div>
         </div>
 
-        <!-- Step 2: Date & Time -->
         <div v-if="currentStep === 1" class="step-content animate-fade-in">
-          <div class="datetime-grid">
-            <div>
+          <div class="datetime-layout">
+            <div class="calendar-column">
               <h3 class="step-title">{{ $t('booking.selectDate') }}</h3>
-              <VueDatePicker
-                v-model="datePickerDate"
-                :locale="locale"
-                :enable-time-picker="false"
-                :min-date="new Date()"
-                :allowed-dates="allowedDatesArray"
-                @update-month-year="handleMonthYearChange"
-                inline
-                auto-apply
-              />
+              <div class="datepicker-container">
+                <VueDatePicker
+                  v-model="datePickerDate"
+                  :locale="locale"
+                  :enable-time-picker="false"
+                  :min-date="new Date()"
+                  :allowed-dates="allowedDatesArray"
+                  @update-month-year="handleMonthYearChange"
+                  inline
+                  auto-apply
+                  dark
+                  :month-change-on-scroll="false"
+                />
+              </div>
             </div>
-            <div>
-              <h3 class="step-title">{{ $t('booking.selectTime') }}</h3>
-              <div v-if="bookingStore.loading" class="slots-loading">Loading...</div>
-              <div v-else-if="bookingStore.availableSlots.length === 0 && bookingStore.selectedDate" class="no-slots">
+            
+            <div class="slots-column">
+              <h3 class="step-title">
+                {{ $t('booking.selectTime') }}
+                <span v-if="bookingStore.selectedDate" class="selected-date-preview">
+                  — {{ formatDateShort(bookingStore.selectedDate) }}
+                </span>
+              </h3>
+              
+              <div v-if="bookingStore.loading" class="slots-loading">
+                <div class="loader"></div>
+                <span>{{ $t('common.loading') || 'Loading slots...' }}</span>
+              </div>
+              <div v-else-if="!bookingStore.selectedDate" class="slots-prompt">
+                {{ $t('booking.pleaseSelectDate') || 'Please select a date to see available times' }}
+              </div>
+              <div v-else-if="bookingStore.availableSlots.length === 0" class="no-slots">
                 {{ $t('booking.noSlots') }}
               </div>
               <div v-else class="time-slots-grid">
@@ -313,6 +329,11 @@ function formatTime(t) {
   return t
 }
 
+function formatDateShort(d) {
+  if (!d) return ''
+  return new Date(d + 'T00:00:00').toLocaleDateString(locale.value, { month: 'short', day: 'numeric' })
+}
+
 function formatDate(d) {
   if (!d) return ''
   return new Date(d + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
@@ -507,62 +528,142 @@ onMounted(() => {
   color: var(--text-muted);
 }
 
-/* Date & Time */
-.datetime-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
+/* Date & Time Layout */
+.datetime-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
 }
 
-.date-input {
-  color-scheme: dark;
-  font-size: 1rem;
+@media (min-width: 1024px) {
+  .datetime-layout {
+    flex-direction: row;
+    align-items: flex-start;
+  }
 }
 
-:deep(.dp__theme_light) {
-  --dp-background-color: var(--bg-card);
-  --dp-text-color: var(--text-primary);
-  --dp-hover-color: var(--bg-card-hover);
-  --dp-hover-text-color: var(--accent-gold);
-  --dp-hover-icon-color: var(--accent-gold);
-  --dp-primary-color: var(--accent-gold);
-  --dp-primary-disabled-color: rgba(212, 168, 67, 0.5);
-  --dp-primary-text-color: #0a0a0f;
-  --dp-secondary-color: var(--text-secondary);
-  --dp-border-color: var(--border);
-  --dp-menu-border-color: var(--border);
-  --dp-border-color-hover: var(--border-gold);
-  --dp-disabled-color: rgba(255, 255, 255, 0.05);
-  --dp-scroll-bar-background: var(--bg-card);
-  --dp-scroll-bar-color: var(--border);
-  --dp-success-color: var(--accent-green);
-  --dp-success-color-disabled: rgba(46, 204, 113, 0.5);
-  --dp-icon-color: var(--text-secondary);
-  --dp-danger-color: var(--accent-red);
-  --dp-marker-color: var(--accent-red);
-  --dp-tooltip-color: var(--bg-card);
-  --dp-disabled-color-text: var(--text-muted);
-  --dp-highlight-color: rgba(212, 168, 67, 0.1);
+.calendar-column {
+  flex: 1.2;
+  width: 100%;
+}
+
+.slots-column {
+  flex: 0.8;
+  width: 100%;
+}
+
+.datepicker-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border-blue);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+}
+
+.selected-date-preview {
+  color: var(--accent-blue);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Deep overrides for DatePicker size and style */
+:deep(.dp__main) {
+  width: 100%;
+  font-family: var(--font-primary);
+}
+
+:deep(.dp__menu) {
+  border: none !important;
+  background: transparent !important;
+  width: 100% !important;
+  box-shadow: none !important;
+}
+
+:deep(.dp__calendar_wrap) {
+  width: 100% !important;
+}
+
+:deep(.dp__instance_calendar) {
+  width: 100% !important;
+}
+
+/* Larger cells for better touch/click experience */
+:deep(.dp__cell_inner) {
+  height: 50px !important;
+  width: 100% !important;
+  font-size: 1.1rem !important;
+  border-radius: var(--radius-md) !important;
+  margin: 2px 0;
+}
+
+:deep(.dp__calendar_header_item) {
+  font-size: 0.9rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding: 12px 0 !important;
+}
+
+:deep(.dp__month_year_row) {
+  margin-bottom: 20px !important;
+}
+
+:deep(.dp__month_year_select) {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: var(--text-primary);
+}
+
+:deep(.dp__arrow_buttons) {
+  color: var(--accent-blue) !important;
+}
+
+:deep(.dp__today) {
+  border: 1px solid var(--accent-blue) !important;
+}
+
+:deep(.dp__active_date) {
+  background: var(--accent-blue) !important;
+  color: #fff !important;
+  box-shadow: 0 0 15px var(--accent-blue-glow) !important;
+}
+
+:deep(.dp__disabled) {
+  opacity: 0.2 !important;
 }
 
 .time-slots-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 10px;
-  max-height: 400px;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
+  max-height: 500px;
   overflow-y: auto;
   padding: 4px;
 }
 
 .time-slot {
-  padding: 12px 16px;
-  background: var(--bg-card);
+  padding: 14px;
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   color: var(--text-primary);
-  font-weight: 500;
+  font-weight: 600;
   transition: var(--transition);
   text-align: center;
+}
+
+.time-slot:hover:not(.disabled) {
+  border-color: var(--accent-blue);
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+}
+
+.time-slot.selected {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: #fff;
+  box-shadow: 0 4px 12px var(--accent-blue-glow);
 }
 
 .time-slot:hover:not(.disabled) {
@@ -582,11 +683,28 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
-.no-slots, .slots-loading {
+.slots-prompt {
   text-align: center;
-  padding: 40px;
-  color: var(--text-muted);
-  font-size: 0.95rem;
+  padding: 60px;
+  background: var(--bg-secondary);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.loader {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--accent-blue-glow);
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Contact */
@@ -790,9 +908,19 @@ onMounted(() => {
   .services-select-grid {
     grid-template-columns: 1fr;
   }
-  .datetime-grid {
-    grid-template-columns: 1fr;
+  .datetime-layout {
+    gap: 24px;
   }
+  
+  :deep(.dp__cell_inner) {
+    height: 44px !important;
+    font-size: 1rem !important;
+  }
+  
+  .slots-prompt {
+    padding: 40px 20px;
+  }
+  
   .form-row {
     grid-template-columns: 1fr;
   }
