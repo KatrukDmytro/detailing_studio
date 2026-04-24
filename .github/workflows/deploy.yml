@@ -58,7 +58,7 @@ jobs:
           region: ${{ env.REGION }}
           image: ${{ env.GAR_LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.BACKEND_IMAGE }}:${{ github.sha }}
           env_vars: |
-            SPRING_PROFILES_ACTIVE=h2
+            SPRING_PROFILES_ACTIVE=default
           flags: '--allow-unauthenticated --port=8080'
 
       - name: Build and Push Frontend
