@@ -6,7 +6,7 @@ import App from './App.vue'
 import messages from './i18n'
 import './assets/styles/main.css'
 
-import VueDatePicker from '@vuepic/vue-datepicker';
+import { VueDatePicker } from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
 
 const i18n = createI18n({
