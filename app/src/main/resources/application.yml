@@ -4,9 +4,9 @@ spring:
 
   # PostgreSQL configuration
   datasource:
-    url: jdbc:postgresql://localhost:5432/detailing_studio
+    url: jdbc:postgresql:///detailing_studio?cloudSqlInstance=project-f0c6dffa-7d80-4aef-9b0:europe-west3:a767891abrisa&socketFactory=com.google.cloud.sql.postgres.SocketFactory
     username: postgres
-    password: postgres
+    password: numb151515!A
     driver-class-name: org.postgresql.Driver
 
   jpa:
