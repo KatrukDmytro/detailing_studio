@@ -38,7 +38,7 @@ app:
     username: admin
     password: brisa2026
   cors:
-    allowed-origins: http://localhost:5173,http://localhost:3000
+    allowed-origins: http://localhost:5173,http://localhost:3000,https://detailing-frontend-518542558773.europe-west3.run.app
 
 ---
 # H2 profile for development without PostgreSQL
