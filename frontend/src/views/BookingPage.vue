@@ -67,21 +67,38 @@
             <div class="calendar-column">
               <h3 class="step-title">{{ $t('booking.selectDate') }}</h3>
               <div class="datepicker-container" :class="{ 'is-loading': bookingStore.loading }">
-                <VueDatePicker
-                  v-model="datePickerDate"
-                  :locale="locale"
-                  :enable-time-picker="false"
-                  :min-date="new Date()"
-                  :allowed-dates="allowedDatesArray"
-                  @update-month-year="handleMonthYearChange"
-                  inline
-                  auto-apply
-                  dark
-                  :month-change-on-scroll="false"
-                  :config="{
-                    allowStopPropagation: true,
-                  }"
-                />
+                <!-- Custom Calendar -->
+              <div class="custom-calendar">
+                <!-- Month Navigation Header -->
+                <div class="cal-header">
+                  <button class="cal-nav" @click="prevMonth" :disabled="isPrevMonthDisabled">&#8249;</button>
+                  <span class="cal-month-label">{{ calMonthLabel }}</span>
+                  <button class="cal-nav" @click="nextMonth">&#8250;</button>
+                </div>
+                <!-- Day Labels -->
+                <div class="cal-weekdays">
+                  <span v-for="d in weekDays" :key="d">{{ d }}</span>
+                </div>
+                <!-- Date Grid -->
+                <div class="cal-grid">
+                  <div
+                    v-for="(cell, idx) in calendarCells"
+                    :key="idx"
+                    class="cal-cell"
+                    :class="{
+                      'cal-empty': !cell,
+                      'cal-available': cell && isAvailable(cell),
+                      'cal-unavailable': cell && !isAvailable(cell),
+                      'cal-selected': cell && selectedDateStr === toDateStr(cell),
+                      'cal-today': cell && toDateStr(cell) === todayStr,
+                      'cal-past': cell && cell < todayDate,
+                    }"
+                    @click="cell && isAvailable(cell) && selectDate(cell)"
+                  >
+                    <span v-if="cell">{{ cell.getDate() }}</span>
+                  </div>
+                </div>
+              </div>
                 <div v-if="bookingStore.loading && !bookingStore.availableDates.length" class="datepicker-overlay">
                   <div class="loader"></div>
                 </div>
@@ -243,8 +260,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useBookingStore } from '../stores/booking'
 import api from '../api/client'
-import { VueDatePicker } from '@vuepic/vue-datepicker'
-import '@vuepic/vue-datepicker/dist/main.css'
 
 const bookingStore = useBookingStore()
 const currentStep = ref(0)
@@ -266,7 +281,73 @@ import { useI18n } from 'vue-i18n'
 
 const { t, locale } = useI18n()
 
-const datePickerDate = ref(null)
+// ── Custom Calendar ──────────────────────────────────────────────────────────
+const calYear  = ref(new Date().getFullYear())
+const calMonth = ref(new Date().getMonth()) // 0-indexed
+
+const weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+
+const todayDate = new Date()
+todayDate.setHours(0,0,0,0)
+const todayStr = toDateStr(todayDate)
+
+function toDateStr(date) {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+const calMonthLabel = computed(() => {
+  return new Date(calYear.value, calMonth.value, 1)
+    .toLocaleDateString('en', { month: 'long', year: 'numeric' })
+})
+
+const calendarCells = computed(() => {
+  const firstDay = new Date(calYear.value, calMonth.value, 1).getDay() // 0=Sun
+  const daysInMonth = new Date(calYear.value, calMonth.value + 1, 0).getDate()
+  const cells = []
+  for (let i = 0; i < firstDay; i++) cells.push(null)
+  for (let d = 1; d <= daysInMonth; d++) {
+    cells.push(new Date(calYear.value, calMonth.value, d))
+  }
+  return cells
+})
+
+const isPrevMonthDisabled = computed(() => {
+  const now = new Date()
+  return calYear.value === now.getFullYear() && calMonth.value <= now.getMonth()
+})
+
+function prevMonth() {
+  if (isPrevMonthDisabled.value) return
+  if (calMonth.value === 0) { calMonth.value = 11; calYear.value-- }
+  else calMonth.value--
+  loadMonthDates()
+}
+function nextMonth() {
+  if (calMonth.value === 11) { calMonth.value = 0; calYear.value++ }
+  else calMonth.value++
+  loadMonthDates()
+}
+function loadMonthDates() {
+  bookingStore.fetchAvailableDates(calYear.value, calMonth.value + 1)
+}
+
+function isAvailable(date) {
+  if (date < todayDate) return false
+  if (bookingStore.availableDates.length === 0) return false
+  return bookingStore.availableDates.includes(toDateStr(date))
+}
+
+const selectedDateStr = computed(() => bookingStore.selectedDate)
+
+async function selectDate(date) {
+  bookingStore.selectedDate = toDateStr(date)
+  bookingStore.selectedSlot = null
+  await bookingStore.fetchAvailableSlots(bookingStore.selectedDate, bookingStore.selectedServices)
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 const minDate = computed(() => {
   const d = new Date()
@@ -291,42 +372,14 @@ import { watch } from 'vue'
 
 watch(currentStep, async (newVal) => {
   if (newVal === 1) {
-    const today = new Date()
-    await bookingStore.fetchAvailableDates(today.getFullYear(), today.getMonth() + 1)
+    await bookingStore.fetchAvailableDates(calYear.value, calMonth.value + 1)
   }
 })
 
-watch(datePickerDate, async (newDate) => {
-  if (newDate) {
-    // Format to YYYY-MM-DD
-    const d = new Date(newDate)
-    const year = d.getFullYear()
-    const month = String(d.getMonth() + 1).padStart(2, '0')
-    const day = String(d.getDate()).padStart(2, '0')
-    bookingStore.selectedDate = `${year}-${month}-${day}`
-    await onDateChange()
-  } else {
-    bookingStore.selectedDate = ''
-  }
-})
+// Removed: datePickerDate watcher (replaced by selectDate())
 
-const allowedDatesArray = computed(() => {
-  return bookingStore.availableDates.map(dateStr => {
-    const parts = dateStr.split('-');
-    return new Date(parts[0], parts[1] - 1, parts[2]);
-  });
-});
+// Removed: isDateDisabled, handleMonthYearChange (replaced by custom calendar)
 
-async function handleMonthYearChange({ instance, month, year }) {
-  // VueDatePicker month is 0-indexed
-  await bookingStore.fetchAvailableDates(year, month + 1)
-}
-
-async function onDateChange() {
-  if (bookingStore.selectedDate && bookingStore.selectedServices.length) {
-    await bookingStore.fetchAvailableSlots(bookingStore.selectedDate, bookingStore.selectedServices)
-  }
-}
 
 function formatTime(t) {
   if (!t) return ''
@@ -569,8 +622,6 @@ onMounted(() => {
   width: 100%;
   position: relative;
   min-height: 380px;
-  display: flex;
-  flex-direction: column;
 }
 
 .datepicker-overlay {
@@ -590,85 +641,127 @@ onMounted(() => {
   font-weight: 500;
 }
 
-/* Deep overrides for DatePicker size and style */
-:deep(.dp__main) {
-  width: 100% !important;
-  font-family: var(--font-primary);
+/* ── Custom Calendar ──────────────────────────────────────────────── */
+.custom-calendar {
+  width: 100%;
+  user-select: none;
+}
+
+.cal-header {
   display: flex;
-  flex-direction: column;
-  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 0 4px;
 }
 
-:deep(.dp__outer_menu_wrap) {
-  width: 100% !important;
-  position: relative !important;
-}
-
-:deep(.dp__menu) {
-  position: relative !important;
-  border: none !important;
-  background: transparent !important;
-  width: 100% !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-}
-
-:deep(.dp__calendar_wrap) {
-  width: 100% !important;
-}
-
-:deep(.dp__instance_calendar) {
-  width: 100% !important;
-}
-
-:deep(.dp__menu_inner) {
-  padding: 0 !important;
-}
-
-/* Larger cells for better touch/click experience */
-:deep(.dp__cell_inner) {
-  height: clamp(36px, 5vw, 54px) !important;
-  width: 100% !important;
-  font-size: clamp(0.8rem, 1.2vw, 1.1rem) !important;
-  border-radius: var(--radius-md) !important;
-  margin: 2px 0;
-}
-
-:deep(.dp__calendar_header_item) {
-  font-size: 0.8rem !important;
-  font-weight: 700 !important;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  padding: 8px 0 !important;
-}
-
-:deep(.dp__month_year_row) {
-  margin-bottom: 20px !important;
-}
-
-:deep(.dp__month_year_select) {
-  font-size: 1.1rem !important;
-  font-weight: 700 !important;
+.cal-month-label {
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--text-primary);
 }
 
-:deep(.dp__arrow_buttons) {
-  color: var(--accent-blue) !important;
+.cal-nav {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--accent-blue);
+  width: 36px;
+  height: 36px;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cal-nav:hover:not(:disabled) {
+  background: rgba(72, 149, 239, 0.1);
+  border-color: var(--accent-blue);
+}
+.cal-nav:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
-:deep(.dp__today) {
-  border: 1px solid var(--accent-blue) !important;
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 8px;
+}
+.cal-weekdays span {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding: 4px 0;
 }
 
-:deep(.dp__active_date) {
-  background: var(--accent-blue) !important;
-  color: #fff !important;
-  box-shadow: 0 0 15px var(--accent-blue-glow) !important;
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
 }
 
-:deep(.dp__disabled) {
-  opacity: 0.2 !important;
+.cal-cell {
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: var(--transition);
+  cursor: default;
+  border: 1px solid transparent;
 }
+
+.cal-empty {
+  background: none;
+}
+
+.cal-available {
+  color: var(--text-primary);
+  cursor: pointer;
+  background: rgba(255,255,255,0.04);
+}
+.cal-available:hover {
+  background: rgba(72, 149, 239, 0.15);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+  transform: scale(1.08);
+}
+
+.cal-unavailable {
+  color: var(--text-muted);
+  opacity: 0.4;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.cal-past {
+  color: var(--text-muted);
+  opacity: 0.3;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.cal-today {
+  border-color: var(--accent-blue) !important;
+}
+
+.cal-selected {
+  background: var(--accent-gold) !important;
+  color: #0a0a0f !important;
+  font-weight: 700 !important;
+  border-color: var(--accent-gold) !important;
+  box-shadow: 0 0 14px rgba(212, 168, 67, 0.4);
+  transform: scale(1.05);
+}
+/* ───────────────────────────────────────────────────────────────────── */
+
 
 .time-slots-grid {
   display: grid;
