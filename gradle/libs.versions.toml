@@ -3,10 +3,11 @@ spring-boot = "3.4.4"
 spring-dependency-management = "1.1.7"
 junit-jupiter = "5.12.1"
 lombok = "1.18.36"
+aws-s3 = "2.25.27"
 
 [libraries]
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
-
+aws-s3 = { module = "software.amazon.awssdk:s3", version.ref = "aws-s3" }
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }

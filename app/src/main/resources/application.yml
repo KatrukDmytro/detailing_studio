@@ -41,9 +41,9 @@ app:
     allowed-origins: http://localhost:5173,http://localhost:3000,https://detailing-frontend-518542558773.europe-west3.run.app
   s3:
     endpoint: ${R2_ENDPOINT:https://b570f853bda76e7e510fbe098d826a55.r2.cloudflarestorage.com}
-    bucket: ${R2_BUCKET:detailing-studio}
-    access-key: ${R2_ACCESS_KEY:your_access_key}
-    secret-key: ${R2_SECRET_KEY:your_secret_key}
+    bucket: ${R2_BUCKET:detailing}
+    access-key: ${R2_ACCESS_KEY:d88b16b1c2ffdfd6dd39e67a8cec4cc1}
+    secret-key: ${R2_SECRET_KEY:3aafb13e02b0c677516857dd9a41451462cc20b8aba0b71994bbcabfb981d99e}
     region: ${R2_REGION:auto}
     public-url-prefix: ${R2_PUBLIC_URL:https://pub-your_pub_id.r2.dev}
 
