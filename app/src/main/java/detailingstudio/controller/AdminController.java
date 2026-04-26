@@ -4,9 +4,10 @@ import detailingstudio.dto.*;
 import detailingstudio.model.BookingStatus;
 import detailingstudio.service.BookingService;
 import detailingstudio.service.ScheduleService;
+import detailingstudio.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
@@ -17,29 +18,29 @@ public class AdminController {
 
     private final BookingService bookingService;
     private final ScheduleService scheduleService;
-
-    @Value("${app.admin.username}")
-    private String adminUsername;
-
-    @Value("${app.admin.password}")
-    private String adminPassword;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // ---- Auth ----
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) {
-        if (adminUsername.equals(loginRequest.getUsername()) &&
-                adminPassword.equals(loginRequest.getPassword())) {
-            // Generate base64 credentials for HTTP Basic auth
-            String credentials = Base64.getEncoder().encodeToString(
-                    (loginRequest.getUsername() + ":" + loginRequest.getPassword()).getBytes());
-            return ResponseEntity.ok(Map.of(
-                    "success", true,
-                    "token", "Basic " + credentials,
-                    "username", loginRequest.getUsername()
-            ));
-        }
-        return ResponseEntity.status(401).body(Map.of("success", false, "message", "Invalid credentials"));
+        return userRepository.findByUsername(loginRequest.getUsername())
+                .filter(user -> passwordEncoder.matches(loginRequest.getPassword(), user.getPassword()))
+                .<ResponseEntity<Map<String, Object>>>map(user -> {
+                    // Generate base64 credentials for HTTP Basic auth
+                    String credentials = Base64.getEncoder().encodeToString(
+                            (loginRequest.getUsername() + ":" + loginRequest.getPassword()).getBytes());
+                    return ResponseEntity.ok(Map.of(
+                            "success", true,
+                            "token", "Basic " + credentials,
+                            "username", loginRequest.getUsername()
+                    ));
+                })
+                .orElseGet(() -> ResponseEntity.status(401).body(Map.of(
+                        "success", false,
+                        "message", "Invalid credentials"
+                )));
     }
 
     // ---- Bookings ----

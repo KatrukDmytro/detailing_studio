@@ -1,10 +1,14 @@
 package detailingstudio.config;
 
 import detailingstudio.model.ServiceType;
+import detailingstudio.model.User;
 import detailingstudio.repository.ServiceTypeRepository;
+import detailingstudio.repository.UserRepository;
 import detailingstudio.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 
@@ -14,11 +18,30 @@ public class DataInitializer implements CommandLineRunner {
 
     private final ScheduleService scheduleService;
     private final ServiceTypeRepository serviceTypeRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Value("${app.admin.username}")
+    private String adminUsername;
+
+    @Value("${app.admin.password}")
+    private String adminPassword;
 
     @Override
     public void run(String... args) {
         scheduleService.initDefaultScheduleIfEmpty();
         initDefaultServicesIfEmpty();
+        initDefaultAdminIfEmpty();
+    }
+
+    private void initDefaultAdminIfEmpty() {
+        if (userRepository.count() == 0) {
+            userRepository.save(User.builder()
+                    .username(adminUsername)
+                    .password(passwordEncoder.encode(adminPassword))
+                    .role("ADMIN")
+                    .build());
+        }
     }
 
     private void initDefaultServicesIfEmpty() {

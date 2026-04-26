@@ -4,9 +4,9 @@ spring:
 
   # PostgreSQL configuration
   datasource:
-    url: jdbc:postgresql:///detailing_studio?cloudSqlInstance=project-f0c6dffa-7d80-4aef-9b0:europe-west3:a767891abrisa&socketFactory=com.google.cloud.sql.postgres.SocketFactory
-    username: postgres
-    password: numb151515!A
+    url: ${DB_URL:jdbc:postgresql:///detailing_studio?cloudSqlInstance=project-f0c6dffa-7d80-4aef-9b0:europe-west3:a767891abrisa&socketFactory=com.google.cloud.sql.postgres.SocketFactory}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:numb151515!A}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -25,9 +25,8 @@ spring:
 
   # Spring Security
   security:
-    user:
-      name: admin
-      password: brisa2026
+    # Managed via database auth now
+    {}
 
 server:
   port: 8080
@@ -35,8 +34,8 @@ server:
 # Application custom properties
 app:
   admin:
-    username: admin
-    password: brisa2026
+    username: ${ADMIN_USERNAME:admin}
+    password: ${ADMIN_PASSWORD:brisa2026}
   cors:
     allowed-origins: http://localhost:5173,http://localhost:3000,https://detailing-frontend-518542558773.europe-west3.run.app
   s3:
@@ -47,24 +46,3 @@ app:
     region: ${R2_REGION:auto}
     public-url-prefix: ${R2_PUBLIC_URL:https://pub-your_pub_id.r2.dev}
 
----
-# H2 profile for development without PostgreSQL
-spring:
-  config:
-    activate:
-      on-profile: h2
-  datasource:
-    url: jdbc:h2:file:./data/detailing_studio;DB_CLOSE_DELAY=-1
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
-  h2:
-    console:
-      enabled: true
-      path: /h2-console

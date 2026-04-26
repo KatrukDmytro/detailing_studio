@@ -47,8 +47,7 @@ public class SlotCalculationService {
             LocalTime slotEnd = slotStart.plusMinutes(totalDurationMinutes);
 
             boolean isAvailable = isSlotAvailable(
-                    date, slotStart, slotEnd, existingBookings, breakConfig, breakMinutes
-            );
+                    date, slotStart, slotEnd, existingBookings, breakConfig, breakMinutes);
 
             slots.add(AvailableSlotResponse.builder()
                     .startTime(slotStart)
@@ -86,8 +85,8 @@ public class SlotCalculationService {
     }
 
     private boolean isSlotAvailable(LocalDate date, LocalTime slotStart, LocalTime slotEnd,
-                                     List<Booking> existingBookings, BreakConfig breakConfig,
-                                     int breakMinutes) {
+            List<Booking> existingBookings, BreakConfig breakConfig,
+            int breakMinutes) {
         // Check lunch break overlap
         if (breakConfig.getLunchStart() != null && breakConfig.getLunchEnd() != null) {
             if (timesOverlap(slotStart, slotEnd, breakConfig.getLunchStart(), breakConfig.getLunchEnd())) {
