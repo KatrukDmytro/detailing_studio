@@ -45,4 +45,7 @@ app:
     secret-key: ${R2_SECRET_KEY:3aafb13e02b0c677516857dd9a41451462cc20b8aba0b71994bbcabfb981d99e}
     region: ${R2_REGION:auto}
     public-url-prefix: ${R2_PUBLIC_URL:https://pub-your_pub_id.r2.dev}
-
+  jwt:
+    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+    expiration: 86400000 # 24 hours
+    cookie-name: jwt-token

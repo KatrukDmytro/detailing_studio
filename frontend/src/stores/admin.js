@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import api from '../api/client'
 
 export const useAdminStore = defineStore('admin', () => {
-  const isAuthenticated = ref(!!localStorage.getItem('admin_token'))
+  const isAuthenticated = ref(!!localStorage.getItem('is_admin'))
   const bookings = ref([])
   const services = ref([])
   const schedule = ref([])
@@ -17,7 +17,7 @@ export const useAdminStore = defineStore('admin', () => {
       error.value = null
       const { data } = await api.post('/admin/login', { username, password })
       if (data.success) {
-        localStorage.setItem('admin_token', data.token)
+        localStorage.setItem('is_admin', 'true')
         isAuthenticated.value = true
         return true
       }
@@ -31,9 +31,15 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
-  function logout() {
-    localStorage.removeItem('admin_token')
-    isAuthenticated.value = false
+  async function logout() {
+    try {
+      await api.post('/admin/logout')
+    } catch (e) {
+      console.error('Logout API call failed', e)
+    } finally {
+      localStorage.removeItem('is_admin')
+      isAuthenticated.value = false
+    }
   }
 
   async function fetchBookings() {

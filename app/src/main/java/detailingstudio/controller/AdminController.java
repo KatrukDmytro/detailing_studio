@@ -5,8 +5,17 @@ import detailingstudio.model.BookingStatus;
 import detailingstudio.service.BookingService;
 import detailingstudio.service.ScheduleService;
 import detailingstudio.repository.UserRepository;
+import detailingstudio.security.JwtService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
@@ -20,27 +29,58 @@ public class AdminController {
     private final ScheduleService scheduleService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
+
+    @Value("${app.jwt.cookie-name}")
+    private String cookieName;
 
     // ---- Auth ----
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<Map<String, Object>> login(
+            @RequestBody LoginRequest loginRequest
+    ) {
         return userRepository.findByUsername(loginRequest.getUsername())
                 .filter(user -> passwordEncoder.matches(loginRequest.getPassword(), user.getPassword()))
                 .<ResponseEntity<Map<String, Object>>>map(user -> {
-                    // Generate base64 credentials for HTTP Basic auth
-                    String credentials = Base64.getEncoder().encodeToString(
-                            (loginRequest.getUsername() + ":" + loginRequest.getPassword()).getBytes());
-                    return ResponseEntity.ok(Map.of(
-                            "success", true,
-                            "token", "Basic " + credentials,
-                            "username", loginRequest.getUsername()
-                    ));
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
+                    String jwtToken = jwtService.generateToken(userDetails);
+                    
+                    ResponseCookie cookie = ResponseCookie.from(cookieName, jwtToken)
+                            .httpOnly(true)
+                            .secure(true)
+                            .path("/")
+                            .maxAge(jwtService.getExpirationTime() / 1000)
+                            .sameSite("Strict")
+                            .build();
+
+                    return ResponseEntity.ok()
+                            .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                            .body(Map.of(
+                                    "success", true,
+                                    "username", user.getUsername()
+                            ));
                 })
                 .orElseGet(() -> ResponseEntity.status(401).body(Map.of(
                         "success", false,
                         "message", "Invalid credentials"
                 )));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, Object>> logout() {
+        ResponseCookie cookie = ResponseCookie.from(cookieName, "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+        
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(Map.of("success", true));
     }
 
     // ---- Bookings ----
