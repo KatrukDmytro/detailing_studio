@@ -10,8 +10,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
@@ -29,18 +31,24 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        log.info("Starting data initialization...");
         scheduleService.initDefaultScheduleIfEmpty();
         initDefaultServicesIfEmpty();
         initDefaultAdminIfEmpty();
+        log.info("Data initialization completed.");
     }
 
     private void initDefaultAdminIfEmpty() {
         if (userRepository.count() == 0) {
+            log.info("No users found. Creating default admin: {}", adminUsername);
             userRepository.save(User.builder()
                     .username(adminUsername)
                     .password(passwordEncoder.encode(adminPassword))
                     .role("ADMIN")
                     .build());
+            log.info("Default admin created successfully.");
+        } else {
+            log.info("Users already exist. Skipping admin creation.");
         }
     }
 
