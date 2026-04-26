@@ -127,9 +127,9 @@
               </div>
             </div>
 
-            <div v-if="review.hasPhotos && review.photos.length > 0" class="review-photos">
-              <div v-for="photo in review.photos" :key="photo.id" class="photo-thumb" @click="openPhoto(photo.id)">
-                <img :src="`/api/reviews/photos/${photo.id}`" alt="Review Photo" loading="lazy" />
+            <div v-if="review.photoUrls && review.photoUrls.length > 0" class="review-photos">
+              <div v-for="(url, idx) in review.photoUrls" :key="idx" class="photo-thumb" @click="openPhoto(url)">
+                <img :src="url" alt="Review Photo" loading="lazy" />
               </div>
             </div>
           </div>
@@ -138,10 +138,10 @@
     </section>
 
     <!-- Photo Modal -->
-    <div v-if="activePhotoId" class="photo-modal" @click="activePhotoId = null">
+    <div v-if="activePhotoUrl" class="photo-modal" @click="activePhotoUrl = null">
       <div class="modal-content" @click.stop>
-        <button class="modal-close" @click="activePhotoId = null">×</button>
-        <img :src="`/api/reviews/photos/${activePhotoId}`" alt="Full screen review photo" />
+        <button class="modal-close" @click="activePhotoUrl = null">×</button>
+        <img :src="activePhotoUrl" alt="Full screen review photo" />
       </div>
     </div>
 
@@ -160,7 +160,7 @@ const showForm = ref(false)
 const isSubmitting = ref(false)
 const submitSuccess = ref(false)
 const files = ref([])
-const activePhotoId = ref(null)
+const activePhotoUrl = ref(null)
 
 const form = ref({
   customerName: '',
@@ -209,21 +209,32 @@ const submitReview = async () => {
   submitSuccess.value = false
 
   try {
-    const formData = new FormData()
-    formData.append('review', JSON.stringify({
+    const photoUrls = []
+    for (const file of files.value) {
+      const presignResp = await axios.get(`${API_URL}/uploads/presigned-url`, {
+        params: { filename: file.name, contentType: file.type }
+      })
+      const { uploadUrl, fileUrl } = presignResp.data
+      
+      await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: { 'Content-Type': file.type }
+      })
+      photoUrls.push(fileUrl)
+    }
+
+    const payload = {
       customerName: form.value.customerName,
       contactInfo: form.value.contactInfo,
       rating: form.value.rating,
       lovedText: form.value.lovedText,
-      improveText: form.value.improveText
-    }))
-    
-    files.value.forEach(file => {
-      formData.append('photos', file)
-    })
+      improveText: form.value.improveText,
+      photoUrls: photoUrls
+    }
 
-    await axios.post(`${API_URL}/reviews`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+    await axios.post(`${API_URL}/reviews`, payload, {
+      headers: { 'Content-Type': 'application/json' }
     })
 
     submitSuccess.value = true
@@ -255,8 +266,8 @@ const submitReview = async () => {
   }
 }
 
-const openPhoto = (id) => {
-  activePhotoId.value = id
+const openPhoto = (url) => {
+  activePhotoUrl.value = url
 }
 
 onMounted(() => {

@@ -33,4 +33,6 @@ public class BookingRequest {
     private List<Long> serviceTypeIds;
 
     private String notes;
+
+    private List<String> photoUrls;
 }

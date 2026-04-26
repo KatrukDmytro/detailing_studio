@@ -432,6 +432,22 @@ async function submitBooking() {
     const startParts = startTime.split ? startTime.split(':') : [String(startTime).padStart(2,'0'), '00']
     const dateTime = `${dateStr}T${startParts[0].padStart(2,'0')}:${startParts[1].padStart(2,'0')}:00`
 
+    const photoUrls = []
+    for (const p of photos.value) {
+      const file = p.file
+      const presignResp = await api.get('/uploads/presigned-url', {
+        params: { filename: file.name, contentType: file.type }
+      })
+      const { uploadUrl, fileUrl } = presignResp.data
+      
+      await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: { 'Content-Type': file.type }
+      })
+      photoUrls.push(fileUrl)
+    }
+
     const booking = {
       customerPhone: contactInfo.value.phone,
       customerEmail: contactInfo.value.email || null,
@@ -440,17 +456,12 @@ async function submitBooking() {
       address: contactInfo.value.address,
       startTime: dateTime,
       serviceTypeIds: bookingStore.selectedServices,
-      notes: contactInfo.value.notes || null
+      notes: contactInfo.value.notes || null,
+      photoUrls: photoUrls
     }
 
-    const formData = new FormData()
-    formData.append('booking', new Blob([JSON.stringify(booking)], { type: 'application/json' }))
-    for (const p of photos.value) {
-      formData.append('photos', p.file)
-    }
-
-    await api.post('/bookings', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+    await api.post('/bookings', booking, {
+      headers: { 'Content-Type': 'application/json' }
     })
 
     submitted.value = true

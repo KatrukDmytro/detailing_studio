@@ -20,10 +20,7 @@ public class BookingPhoto {
     private String originalName;
 
     @Column(nullable = false)
-    private String contentType;
-
-    @Column(nullable = false, columnDefinition = "BYTEA")
-    private byte[] data;
+    private String photoUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id", nullable = false)
